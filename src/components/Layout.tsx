@@ -5,6 +5,9 @@ import { api, clearAuth, getStoredUser, setStoredUser, type UserInfo } from '../
 const navItems = [
   { to: '/', label: '智能问询', icon: '💬', end: true },
   { to: '/admin', label: '知识库管理', icon: '🗂️', end: false },
+  { to: '/eval', label: '评测', icon: '🧪', end: false },
+  { to: '/audit', label: '审计日志', icon: '🕒', end: false, adminOnly: true },
+  { to: '/review', label: '人工复核', icon: '🛡️', end: false, adminOnly: true },
 ]
 
 export default function Layout() {
@@ -37,6 +40,8 @@ export default function Layout() {
     navigate('/login', { replace: true })
   }
 
+  const visibleNavItems = navItems.filter((item) => !item.adminOnly || user?.role === 'admin')
+
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -48,7 +53,7 @@ export default function Layout() {
           </div>
         </div>
         <nav className="nav">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

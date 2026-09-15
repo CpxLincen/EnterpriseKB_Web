@@ -7,7 +7,7 @@ interface UploadEntry {
   detail: string
 }
 
-const ACCEPT = '.md,.txt,.pdf'
+const ACCEPT = '.md,.txt,.docx,.xlsx,.pptx,.html,.htm,.epub,.pdf'
 
 export default function AdminPage() {
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([])
@@ -85,10 +85,13 @@ export default function AdminPage() {
       const file = files[i]
       try {
         const res = await api.uploadDocument(kb, file)
-        const detail =
+        let detail =
           res.chunks > 0
             ? `解析成功，已写入 ${res.chunks} 个文本块到向量库`
             : '内容已存在（哈希去重），未重复导入'
+        if (res.warnings && res.warnings.length > 0) {
+          detail += `；⚠️ ${res.warnings.join('；')}`
+        }
         setUploads((prev) => prev.map((u, idx) => (idx === i ? { ...u, status: 'ok' as const, detail } : u)))
       } catch (err) {
         const detail = err instanceof Error ? err.message : String(err)
@@ -177,7 +180,7 @@ export default function AdminPage() {
             />
             <div className="dropzone-icon">📄</div>
             <p>点击选择或拖拽文件到此处</p>
-            <p className="dropzone-sub">支持 .md / .txt / 文字型 .pdf，可多选</p>
+            <p className="dropzone-sub">支持 .md / .txt / .docx / .xlsx / .pptx / .html / .epub / 文字型 .pdf，可多选</p>
           </div>
 
           {files.length > 0 && (

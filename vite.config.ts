@@ -12,6 +12,10 @@ export default defineConfig({
     proxy: {
       '/knowledge-bases': 'http://127.0.0.1:8000',
       '/chat': 'http://127.0.0.1:8000',
+      '/conversations': 'http://127.0.0.1:8000',
+      '/eval': 'http://127.0.0.1:8000',
+      '/audit': 'http://127.0.0.1:8000',
+      '/review': 'http://127.0.0.1:8000',
       '/auth': 'http://127.0.0.1:8000',
       '/docs': 'http://127.0.0.1:8000',
       '/openapi.json': 'http://127.0.0.1:8000',
