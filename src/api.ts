@@ -56,6 +56,19 @@ export interface UploadResult {
   filename: string
   knowledge_base: string
   chunks: number
+  text_chunks?: number
+  table_chunks?: number
+  skipped_pages?: number
+  ocr_pages?: number
+  parse_ms?: number
+  warnings?: string[]
+}
+
+export interface RebuildResult {
+  knowledge_base: string
+  processed: number
+  chunks: number
+  errors: string[]
   warnings?: string[]
 }
 
@@ -421,6 +434,16 @@ export const api = {
       `/knowledge-bases/${encodeURIComponent(kb)}/documents/${id}`,
       { method: 'DELETE' },
     ),
+  reingestKnowledgeBase: (kb: string, sourceDir: string) =>
+    request<RebuildResult>(`/knowledge-bases/${encodeURIComponent(kb)}/reingest`, {
+      method: 'POST',
+      body: JSON.stringify({ source_dir: sourceDir }),
+    }),
+  rebuildKnowledgeBase: (kb: string, sourceDir: string) =>
+    request<RebuildResult>(`/knowledge-bases/${encodeURIComponent(kb)}/rebuild`, {
+      method: 'POST',
+      body: JSON.stringify({ source_dir: sourceDir }),
+    }),
   listEvalSets: () => request<EvalSetInfo[]>('/eval/sets'),
   getEvalSet: (setId: string) =>
     request<{ id: string; knowledge_base: string; cases: EvalCase[] }>(

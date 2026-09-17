@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   api,
   conversationChatStream,
+  getStoredUser,
   type Citation,
   type ConversationMessage as ServerMessage,
   type ConversationSummary,
@@ -53,6 +54,7 @@ function CitationList({ citations }: { citations: Citation[] }) {
 }
 
 export default function ChatPage() {
+  const isAdmin = getStoredUser()?.role === 'admin'
   const [conversations, setConversations] = useState<ConversationSummary[]>([])
   const [conversationFilter, setConversationFilter] = useState<'active' | 'archived'>('active')
   const [activeConversationId, setActiveConversationId] = useState<number | null>(null)
@@ -161,6 +163,18 @@ export default function ChatPage() {
     }
   }
 
+  async function handleRetention() {
+    try {
+      const res = await api.runRetention()
+      window.alert(
+        `保留策略执行完成：归档 ${res.archived} 个会话，永久删除 ${res.deleted} 个会话。`,
+      )
+      void refreshConversations(conversationFilter)
+    } catch (err) {
+      window.alert(err instanceof Error ? err.message : String(err))
+    }
+  }
+
   useEffect(() => {
     void refreshConversations('active')
   }, [refreshConversations])
@@ -256,6 +270,15 @@ export default function ChatPage() {
           <button className="btn primary conv-new" onClick={newConversation}>
             ＋ 新建会话
           </button>
+          {isAdmin && (
+            <button
+              className="btn ghost conv-retention"
+              onClick={() => void handleRetention()}
+              title="立即执行会话保留策略（自动归档 + 删除过期会话）"
+            >
+              🧹 保留策略
+            </button>
+          )}
           <div className="conv-tabs">
             <button
               className={`conv-tab${conversationFilter === 'active' ? ' active' : ''}`}

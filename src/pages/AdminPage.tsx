@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { api, type DocumentInfo, type KnowledgeBase } from '../api'
+import {
+  api,
+  getStoredUser,
+  type DocumentInfo,
+  type KnowledgeBase,
+  type RebuildResult,
+} from '../api'
 
 interface UploadEntry {
   filename: string
@@ -10,6 +16,7 @@ interface UploadEntry {
 const ACCEPT = '.md,.txt,.docx,.xlsx,.pptx,.html,.htm,.epub,.pdf'
 
 export default function AdminPage() {
+  const isAdmin = getStoredUser()?.role === 'admin'
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([])
   const [targetKb, setTargetKb] = useState('default')
   const [files, setFiles] = useState<File[]>([])
@@ -21,6 +28,11 @@ export default function AdminPage() {
   const [loadingDocs, setLoadingDocs] = useState<Record<string, boolean>>({})
   const [refreshing, setRefreshing] = useState(false)
   const [kbError, setKbError] = useState<string | null>(null)
+  const [opsKb, setOpsKb] = useState('default')
+  const [opsSourceDir, setOpsSourceDir] = useState('')
+  const [opsLoading, setOpsLoading] = useState<'reingest' | 'rebuild' | null>(null)
+  const [opsResult, setOpsResult] = useState<RebuildResult | null>(null)
+  const [opsError, setOpsError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const refreshKbs = useCallback(async () => {
@@ -89,6 +101,13 @@ export default function AdminPage() {
           res.chunks > 0
             ? `解析成功，已写入 ${res.chunks} 个文本块到向量库`
             : '内容已存在（哈希去重），未重复导入'
+        if (res.chunks > 0) {
+          const meta = [`正文 ${res.text_chunks ?? 0}`, `表格 ${res.table_chunks ?? 0}`]
+          if (res.skipped_pages) meta.push(`跳过扫描页 ${res.skipped_pages}`)
+          if (res.ocr_pages) meta.push(`OCR ${res.ocr_pages} 页`)
+          if (res.parse_ms != null) meta.push(`解析 ${Math.round(res.parse_ms)}ms`)
+          detail += `（${meta.join(' · ')}）`
+        }
         if (res.warnings && res.warnings.length > 0) {
           detail += `；⚠️ ${res.warnings.join('；')}`
         }
@@ -117,6 +136,37 @@ export default function AdminPage() {
     } catch (err) {
       const text = err instanceof Error ? err.message : String(err)
       alert(`删除失败：${text}`)
+    }
+  }
+
+  async function handleRebuild(mode: 'reingest' | 'rebuild') {
+    const kb = opsKb.trim() || 'default'
+    const dir = opsSourceDir.trim()
+    if (!dir) {
+      setOpsError('请填写服务器本机源文档目录路径')
+      return
+    }
+    if (mode === 'rebuild') {
+      const ok = window.confirm(
+        `确定重建知识库「${kb}」吗？将清空该库全部文档，并按「${dir}」全量重导；目录之外的旧文档会被删除。`,
+      )
+      if (!ok) return
+    }
+    setOpsLoading(mode)
+    setOpsResult(null)
+    setOpsError(null)
+    try {
+      const res =
+        mode === 'reingest'
+          ? await api.reingestKnowledgeBase(kb, dir)
+          : await api.rebuildKnowledgeBase(kb, dir)
+      setOpsResult(res)
+      await refreshKbs()
+      if (expandedKb === kb) await loadDocuments(kb)
+    } catch (err) {
+      setOpsError(err instanceof Error ? err.message : String(err))
+    } finally {
+      setOpsLoading(null)
     }
   }
 
@@ -216,6 +266,62 @@ export default function AdminPage() {
           </ul>
         )}
       </section>
+
+      {isAdmin && (
+        <section className="card">
+          <h2>索引运维（重导 / 重建）</h2>
+          <p className="page-sub">
+            从服务器本机源文档目录重建知识库索引。重导（reingest）保持 Embedding 配置并替换同名文档；
+            重建（rebuild）会清空该库后全量重导，用于更换 Embedding 模型或彻底重建。
+          </p>
+          <div className="upload-form">
+            <label className="kb-picker">
+              <span>目标知识库</span>
+              <input
+                list="admin-ops-kb-options"
+                value={opsKb}
+                onChange={(e) => setOpsKb(e.target.value)}
+                placeholder="知识库名"
+              />
+              <datalist id="admin-ops-kb-options">
+                {knowledgeBases.map((kb) => (
+                  <option key={kb.name} value={kb.name} />
+                ))}
+              </datalist>
+            </label>
+            <label className="kb-picker">
+              <span>服务器源目录</span>
+              <input
+                value={opsSourceDir}
+                onChange={(e) => setOpsSourceDir(e.target.value)}
+                placeholder="如 E:\EnterpriseKB\examples"
+              />
+            </label>
+            <div className="upload-actions">
+              <button className="btn" onClick={() => void handleRebuild('reingest')} disabled={opsLoading !== null}>
+                {opsLoading === 'reingest' ? '重导中…' : '↻ 重导（reingest）'}
+              </button>
+              <button className="btn danger" onClick={() => void handleRebuild('rebuild')} disabled={opsLoading !== null}>
+                {opsLoading === 'rebuild' ? '重建中…' : '⟳ 重建（rebuild）'}
+              </button>
+            </div>
+          </div>
+          {opsError && <div className="alert error">{opsError}</div>}
+          {opsResult && (
+            <div className="ops-result">
+              <div className="ops-ok">
+                ✅ 已处理 {opsResult.processed} 个文件，写入 {opsResult.chunks} 个文本块。
+              </div>
+              {opsResult.warnings && opsResult.warnings.length > 0 && (
+                <div className="ops-warn">⚠️ {opsResult.warnings.join('；')}</div>
+              )}
+              {opsResult.errors && opsResult.errors.length > 0 && (
+                <div className="ops-errors">❌ 部分文件失败：{opsResult.errors.join('；')}</div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="card">
         <h2>知识库列表（{knowledgeBases.length}）</h2>

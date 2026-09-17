@@ -358,6 +358,31 @@ button {
   border: 1px solid #fecaca;
 }
 
+/* ---------- 索引运维结果 ---------- */
+.ops-result {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ops-ok {
+  color: var(--ok);
+}
+
+.ops-warn {
+  color: #b45309;
+}
+
+.ops-errors {
+  color: var(--danger);
+}
+
 /* ---------- 知识库选择 ---------- */
 .kb-picker {
   display: flex;
@@ -410,6 +435,11 @@ button {
 
 .conv-new {
   width: 100%;
+}
+
+.conv-retention {
+  width: 100%;
+  margin-top: 8px;
 }
 
 .conv-tabs {
