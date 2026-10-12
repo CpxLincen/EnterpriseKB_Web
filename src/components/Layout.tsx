@@ -8,6 +8,7 @@ const navItems = [
   { to: '/eval', label: '评测', icon: '🧪', end: false },
   { to: '/audit', label: '审计日志', icon: '🕒', end: false, adminOnly: true },
   { to: '/review', label: '人工复核', icon: '🛡️', end: false, adminOnly: true },
+  { to: '/directory', label: '组织架构', icon: '🏢', end: false, adminOnly: true },
 ]
 
 export default function Layout() {

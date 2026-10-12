@@ -16,6 +16,7 @@ export default defineConfig({
       '/eval': 'http://127.0.0.1:8000',
       '/audit': 'http://127.0.0.1:8000',
       '/review': 'http://127.0.0.1:8000',
+      '/directory': 'http://127.0.0.1:8000',
       '/auth': 'http://127.0.0.1:8000',
       '/docs': 'http://127.0.0.1:8000',
       '/openapi.json': 'http://127.0.0.1:8000',

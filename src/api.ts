@@ -214,6 +214,85 @@ export interface ConversationListResponse {
   items: ConversationSummary[]
 }
 
+export interface DirectoryRole {
+  id: number
+  name: string
+  description: string | null
+  personnel_count: number
+  created_at: string | null
+}
+
+export interface Organization {
+  id: number
+  pid: number | null
+  org_name: string
+  org_type: string
+  layer: number
+  status: string
+  external_id: string | null
+  personnel_count: number
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface OrganizationDetail extends Organization {
+  parent: { id: number; org_name: string } | null
+  children: { id: number; org_name: string; layer: number; status: string }[]
+}
+
+export interface PersonnelRoleRef {
+  id: number
+  name: string
+  description: string | null
+}
+
+export interface Personnel {
+  id: number
+  userid: string
+  username: string
+  company_id: number | null
+  company_name: string | null
+  dept_id: number | null
+  dept_name: string | null
+  status: string
+  wework_id: string | null
+  user_id: number | null
+  roles: PersonnelRoleRef[]
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface PersonnelListResponse {
+  total: number
+  limit: number
+  offset: number
+  items: Personnel[]
+}
+
+export interface OrganizationWrite {
+  org_name: string
+  org_type: string
+  // 兼容旧 API；省略时由后端按父组织自动计算。
+  layer?: number
+  pid: number | null
+  status: string
+  external_id: string | null
+}
+
+export interface RoleWrite {
+  name: string
+  description: string | null
+}
+
+export interface PersonnelWrite {
+  userid: string
+  username: string
+  company_id: number | null
+  dept_id: number | null
+  status: string
+  wework_id: string | null
+}
+
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)
 }
@@ -522,4 +601,74 @@ export const api = {
       '/conversations/retention/run',
       { method: 'POST' },
     ),
+  // ---- 组织 / 人员 / 角色目录（仅 admin） ----
+  listOrganizations: () => request<Organization[]>('/directory/organizations'),
+  getOrganization: (id: number) =>
+    request<OrganizationDetail>(`/directory/organizations/${id}`),
+  createOrganization: (body: OrganizationWrite) =>
+    request<Organization>('/directory/organizations', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  updateOrganization: (id: number, body: OrganizationWrite) =>
+    request<Organization>(`/directory/organizations/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteOrganization: (id: number) =>
+    request<{ deleted: boolean; id: number }>(`/directory/organizations/${id}`, {
+      method: 'DELETE',
+    }),
+  listRoles: () => request<DirectoryRole[]>('/directory/roles'),
+  getRole: (id: number) => request<DirectoryRole>(`/directory/roles/${id}`),
+  createRole: (body: RoleWrite) =>
+    request<DirectoryRole>('/directory/roles', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  updateRole: (id: number, body: RoleWrite) =>
+    request<DirectoryRole>(`/directory/roles/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deleteRole: (id: number) =>
+    request<{ deleted: boolean; id: number }>(`/directory/roles/${id}`, {
+      method: 'DELETE',
+    }),
+  listPersonnel: (params: {
+    q?: string
+    dept_id?: number
+    status?: string
+    limit?: number
+    offset?: number
+  }) => {
+    const qs = new URLSearchParams()
+    if (params.q) qs.set('q', params.q)
+    if (params.dept_id != null) qs.set('dept_id', String(params.dept_id))
+    if (params.status) qs.set('status', params.status)
+    if (params.limit != null) qs.set('limit', String(params.limit))
+    if (params.offset != null) qs.set('offset', String(params.offset))
+    const query = qs.toString()
+    return request<PersonnelListResponse>(`/directory/personnel${query ? `?${query}` : ''}`)
+  },
+  getPersonnel: (id: number) => request<Personnel>(`/directory/personnel/${id}`),
+  createPersonnel: (body: PersonnelWrite) =>
+    request<Personnel>('/directory/personnel', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  updatePersonnel: (id: number, body: PersonnelWrite) =>
+    request<Personnel>(`/directory/personnel/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
+  deletePersonnel: (id: number) =>
+    request<{ deleted: boolean; id: number }>(`/directory/personnel/${id}`, {
+      method: 'DELETE',
+    }),
+  setPersonnelRoles: (id: number, roleIds: number[]) =>
+    request<Personnel>(`/directory/personnel/${id}/roles`, {
+      method: 'PUT',
+      body: JSON.stringify({ role_ids: roleIds }),
+    }),
 }

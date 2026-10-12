@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import AdminPage from './pages/AdminPage'
 import AuditLogPage from './pages/AuditLogPage'
 import ChatPage from './pages/ChatPage'
+import DirectoryPage from './pages/DirectoryPage'
 import EvalPage from './pages/EvalPage'
 import LoginPage from './pages/LoginPage'
 import ReviewPage from './pages/ReviewPage'
@@ -29,6 +30,7 @@ export default function App() {
         <Route path="/eval" element={<EvalPage />} />
         <Route path="/audit" element={<AuditLogPage />} />
         <Route path="/review" element={<ReviewPage />} />
+        <Route path="/directory" element={<DirectoryPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

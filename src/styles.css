@@ -1597,3 +1597,281 @@ button {
   border: 1px solid #fecaca;
   color: var(--danger);
 }
+
+/* ---------- 组织架构（组织 / 人员 / 角色）页 ---------- */
+.directory-page {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.dir-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.dir-side,
+.dir-detail {
+  min-width: 0;
+}
+
+.dir-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.dir-side-head h2 {
+  margin: 0;
+}
+
+.dir-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.dir-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  font-size: 13.5px;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dir-row:hover {
+  background: var(--surface-2);
+}
+
+.dir-row.active {
+  background: var(--primary-soft);
+  border-color: #c7d2fe;
+}
+
+.dir-row-name {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.dir-row-meta {
+  flex: 1;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dir-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.dir-search {
+  flex: 1 1 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.dir-toolbar select {
+  flex: 1;
+  min-width: 120px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.dir-search:focus,
+.dir-toolbar select:focus {
+  outline: 2px solid var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.dir-detail h2 {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.dir-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px 20px;
+}
+
+.dir-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dir-field-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.dir-field-value {
+  font-size: 14px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.dir-sub-block {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.dir-sub-block h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dir-desc {
+  margin: 0;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.dir-tags {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dir-tag {
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.dir-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+}
+
+.dir-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dir-field-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.dir-field-row input,
+.dir-field-row select,
+.dir-field-row textarea {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.dir-field-row textarea {
+  resize: vertical;
+}
+
+.dir-field-row input:focus,
+.dir-field-row select:focus,
+.dir-field-row textarea:focus {
+  outline: 2px solid var(--primary-soft);
+  border-color: var(--primary);
+}
+
+.role-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.role-checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.role-checkbox-item:hover {
+  border-color: var(--primary);
+}
+
+.role-checkbox-item input {
+  accent-color: var(--primary);
+}
+
+.role-checkbox-item span {
+  font-weight: 600;
+}
+
+.role-checkbox-item em {
+  color: var(--text-muted);
+  font-style: normal;
+  font-size: 12.5px;
+}
+
+.status-pill.active {
+  background: var(--ok-soft);
+  border: 1px solid #bbf7d0;
+  color: var(--ok);
+}
+
+.status-pill.disabled {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+@media (max-width: 900px) {
+  .dir-layout {
+    grid-template-columns: 1fr;
+  }
+}
